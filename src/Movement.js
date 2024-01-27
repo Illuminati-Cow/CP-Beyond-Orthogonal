@@ -6,7 +6,7 @@ class Movement extends Phaser.Scene {
     init() {
         this.PLAYER_VELOCITY = 5
         this.PHYSICS_VELOCITY_MULT = 100
-        this.lastDirection = new Phaser.Vector2(0,.1)
+        this.lastDirection = "down"
     }
 
     preload() {
@@ -23,39 +23,74 @@ class Movement extends Phaser.Scene {
             key: 'idle-down',
             frameRate: 0,
             repeat: -1,
-            frames: this.anims.generateFrameNumbers('characteer', {
+            frames: this.anims.generateFrameNumbers('character', {
                 start:1,
                 end: 1
-            }),
+            })
+        });
+        this.anims.create({
+            key: 'idle-up',
+            frameRate: 0,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('character', {
+                start:10,
+                end: 10
+            })
+        });
+        this.anims.create({
+            key: 'idle-left',
+            frameRate: 0,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('character', {
+                start:4,
+                end: 4
+            })
+        });
+        this.anims.create({
+            key: 'idle-right',
+            frameRate: 0,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('character', {
+                start:7,
+                end: 7
+            })
+        });
+        this.anims.create({
             key: 'walk-down',
             frameRate: 5,
             repeat: -1,
-            frames: this.anims.generateFrameNumbers('characteer', {
+            frames: this.anims.generateFrameNumbers('character', {
                 start:0,
                 end: 2
-            }),
-            key: 'walk-left',
-            frameRate: 5,
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('characteer', {
-                start:6,
-                end: 8
-            }),
+            })
+        });
+        this.anims.create({
             key: 'walk-right',
             frameRate: 5,
             repeat: -1,
-            frames: this.anims.generateFrameNumbers('characteer', {
+            frames: this.anims.generateFrameNumbers('character', {
+                start:6,
+                end: 8
+            })
+        });
+        this.anims.create({
+            key: 'walk-left',
+            frameRate: 5,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('character', {
                 start:3,
                 end: 5
             }),
+        });
+        this.anims.create({
             key: 'walk-up',
             frameRate: 5,
             repeat: -1,
-            frames: this.anims.generateFrameNumbers('characteer', {
+            frames: this.anims.generateFrameNumbers('character', {
                 start:9,
                 end: 11
             }),
-        })
+        });
 
         this.player = this.physics.add.sprite(game.config.width/2, game.config.height/2, 'character', 1).setOrigin(0.5).setScale(2)
         this.player.body.setCollideWorldBounds(true, 0, 0)
@@ -79,9 +114,40 @@ class Movement extends Phaser.Scene {
             inputVector.x += this.PLAYER_VELOCITY
         }
         inputVector.normalize()
-        let playerAnimation = ""
-        playerAnimation = inputVector.length() > 0 ? "walk" : "idle-"
-        playerAnimation += inputVector.x > 0 ?    
+        
+        let playerAnimation = inputVector.lengthSq() > 0 ? "walk-" : "idle-"
+        let dir = ""
+        if (inputVector.lengthSq() == 0) {
+            dir = this.lastDirection
+            playerAnimation += dir
+            this.player.play(playerAnimation)
+        }
+        else {
+            dir = this.cardinalFromVector(inputVector)
+        }
+        playerAnimation += dir
+        if (playerAnimation.indexOf(this.lastDirection) == -1)
+            this.player.play(playerAnimation)
         this.player.setVelocity(inputVector.x * this.PHYSICS_VELOCITY_MULT * this.PLAYER_VELOCITY, inputVector.y * this.PHYSICS_VELOCITY_MULT * this.PLAYER_VELOCITY)
+        this.lastDirection = dir
+    }
+
+    cardinalFromVector(vector2) {
+        if (vector2.lengthSq() == 0)
+            return this.lastDirection
+        let dir = ""
+        let max = 1
+        if (Math.abs(vector2.x) >= Math.abs(vector2.y))
+            max = vector2.x
+        else
+            max = vector2.y
+        let x = vector2.x / max
+        let y = vector2.y / max
+        if (Math.abs(x) == 1)
+            dir += (vector2.x > 0) ? "right" : "left"
+        else if (Math.abs(y) == 1)
+            dir += (vector2.y > 0) > 0 ? "down" : "up"
+        //console.log(vector2)
+        return dir
     }
 }
