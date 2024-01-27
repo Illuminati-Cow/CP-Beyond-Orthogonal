@@ -7,6 +7,7 @@ class Movement extends Phaser.Scene {
         this.PLAYER_VELOCITY = 5
         this.PHYSICS_VELOCITY_MULT = 100
         this.lastDirection = "down"
+        this.lastAnimation = "idle-down"
     }
 
     preload() {
@@ -126,15 +127,17 @@ class Movement extends Phaser.Scene {
             dir = this.cardinalFromVector(inputVector)
         }
         playerAnimation += dir
-        if (playerAnimation.indexOf(this.lastDirection) == -1)
+        this.lastAnimation = this.player.anims.getName()
+        if (playerAnimation != this.lastAnimation)
             this.player.play(playerAnimation)
         this.player.setVelocity(inputVector.x * this.PHYSICS_VELOCITY_MULT * this.PLAYER_VELOCITY, inputVector.y * this.PHYSICS_VELOCITY_MULT * this.PLAYER_VELOCITY)
         this.lastDirection = dir
     }
 
+    // Returns the string 'zero' if the vector 2 is zero
     cardinalFromVector(vector2) {
         if (vector2.lengthSq() == 0)
-            return this.lastDirection
+            return "zero"
         let dir = ""
         let max = 1
         if (Math.abs(vector2.x) >= Math.abs(vector2.y))
